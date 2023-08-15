@@ -83,7 +83,6 @@ namespace TestAuthJWT.Services
             authModel.Roles = roleList.ToList();
             return authModel;
         }
-
         public async Task<string> AddRoleAsync(AddRoleModel model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
