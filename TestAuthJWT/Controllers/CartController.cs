@@ -79,7 +79,7 @@ namespace AuthMaster.Controllers
                     await _dataContext.SaveChangesAsync();
                     return Ok("You don't have any items in your cart!");
                 }                   
-            }
+            } 
             else
             { 
                 return Unauthorized();
