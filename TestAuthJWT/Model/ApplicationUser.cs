@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AuthMaster.Model;
+using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Data.Common;
+using System.Text.Json.Serialization;
 
 namespace TestAuthJWT.Model
 {
@@ -10,5 +12,7 @@ namespace TestAuthJWT.Model
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
+
+      
     }
 }

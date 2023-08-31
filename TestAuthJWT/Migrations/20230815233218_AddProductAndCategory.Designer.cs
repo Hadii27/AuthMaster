@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TestAuthJWT.Data;
 
@@ -11,9 +12,11 @@ using TestAuthJWT.Data;
 namespace TestAuthJWT.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230815233218_AddProductAndCategory")]
+    partial class AddProductAndCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,49 +24,6 @@ namespace TestAuthJWT.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AuthMaster.Model.Cart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid>("userID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("carts");
-                });
-
-            modelBuilder.Entity("AuthMaster.Model.CartItems", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("cartID")
-                        .HasColumnType("int");
-
-                    b.Property<double>("price")
-                        .HasColumnType("float");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("cartID");
-
-                    b.ToTable("cartItems");
-                });
 
             modelBuilder.Entity("AuthMaster.Model.CategoryModel", b =>
                 {
@@ -101,15 +61,8 @@ namespace TestAuthJWT.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<int>("categoryId")
                         .HasColumnType("int");
-
-                    b.Property<byte[]>("image")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("ProductId");
 
@@ -324,21 +277,10 @@ namespace TestAuthJWT.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("AuthMaster.Model.CartItems", b =>
-                {
-                    b.HasOne("AuthMaster.Model.Cart", "cart")
-                        .WithMany("CartItems")
-                        .HasForeignKey("cartID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("cart");
-                });
-
             modelBuilder.Entity("AuthMaster.Model.ProductModel", b =>
                 {
                     b.HasOne("AuthMaster.Model.CategoryModel", "category")
-                        .WithMany("Products")
+                        .WithMany("products")
                         .HasForeignKey("categoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -397,14 +339,9 @@ namespace TestAuthJWT.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AuthMaster.Model.Cart", b =>
-                {
-                    b.Navigation("CartItems");
-                });
-
             modelBuilder.Entity("AuthMaster.Model.CategoryModel", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("products");
                 });
 #pragma warning restore 612, 618
         }

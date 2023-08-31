@@ -16,6 +16,7 @@ namespace TestAuthJWT.Controllers
         {
             _authService = authService;
         }
+
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterModel model)
         {
@@ -51,7 +52,5 @@ namespace TestAuthJWT.Controllers
                 return BadRequest(result);
             return Ok(model);
         }
-
-
     }
 }
