@@ -8,7 +8,7 @@ namespace TestAuthJWT.Data
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
         { 
-
+             
         }
     }
 }
