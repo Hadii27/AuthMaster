@@ -8,7 +8,11 @@ namespace TestAuthJWT.Data
     public class DataContext: IdentityDbContext<ApplicationUser>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
+ ;
         {
+        { 
+             
+
         }
        
         public DbSet<CategoryModel> categories { get; set; }
