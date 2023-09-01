@@ -58,7 +58,7 @@ namespace AuthMaster.Controllers
                 Quantity = dto.Quantity,
                 price = selectedProduct.Price,
             };
-
+             
             userCart.CartItems.Add(cartItem);
 
             var cart = new Cart
