@@ -34,19 +34,6 @@ namespace AuthMaster.Services
                 var userCart = await _dataContext.carts
                     .Include(x => x.CartItems)
                     .SingleOrDefaultAsync(c => c.userID == userId.Value);
-
-                if (userCart == null)
-                {
-                    userCart = new Cart
-                    {
-                        userID = userId.Value,
-                        CartItems = new List<CartItems>(),
-                    };
-
-                    _dataContext.carts.Add(userCart);
-                    await _dataContext.SaveChangesAsync();
-                }
-
                 return userCart;
             }
 

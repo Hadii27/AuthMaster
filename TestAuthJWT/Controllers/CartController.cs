@@ -34,11 +34,23 @@ namespace AuthMaster.Controllers
             }
 
             var userCart = await _services.GetUserCart();
-
-            if (dto.Quantity > selectedProduct.Quantity)
+            if (userCart == null)
             {
-                return BadRequest($"Only {selectedProduct.Quantity} available");
+                userCart = new Cart
+                {
+                    userID = (Guid)_services.GetCurrentUserId(),
+                    CartItems = new List<CartItems>(),
+                };
+                _dataContext.carts.Add(userCart);
+                await _dataContext.SaveChangesAsync();
             }
+
+            if (dto.Quantity == 0)           
+                 return BadRequest ("Quantity must be greater than 0.");
+            
+            else if (dto.Quantity > selectedProduct.Quantity)           
+                return BadRequest ($"Only {selectedProduct.Quantity} available.");
+            
 
             var cartItem = new CartItems
             {
@@ -46,7 +58,7 @@ namespace AuthMaster.Controllers
                 Quantity = dto.Quantity,
                 price = selectedProduct.Price,
             };
-
+             
             userCart.CartItems.Add(cartItem);
 
             var cart = new Cart
@@ -85,7 +97,33 @@ namespace AuthMaster.Controllers
                 return Unauthorized();
             }
             return Ok(userCart);
-        }     
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetMyCart()
+        {
+            var userId = _services.GetCurrentUserId();
+            var Usercart = await _services.GetUserCart();
+
+            if (userId.HasValue)
+            {
+                if (Usercart is not null)
+                {
+                    return Ok(Usercart.CartItems);
+                }
+                else
+                {
+                    return Ok("You don't have a cart.");
+                }
+            }
+            else
+            {
+                return Unauthorized("You don't have permission to access this user cart");
+            }
+        }
+
+
     }
 
 }
