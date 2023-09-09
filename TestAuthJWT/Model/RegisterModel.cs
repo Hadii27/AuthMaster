@@ -15,5 +15,6 @@ namespace TestAuthJWT.Model
         [Required]
         public string Password { get; set; }
 
+   
     }
 }

@@ -20,7 +20,6 @@ namespace AuthMaster.Services
         public Guid? GetCurrentUserId()
         {
             var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirstValue("UserId");
-
             var UserId = Guid.TryParse(userIdClaim, out Guid userId);           
             return userId;
         }
@@ -34,7 +33,7 @@ namespace AuthMaster.Services
                 var userCart = await _dataContext.carts
                     .Include(x => x.CartItems)
                     .SingleOrDefaultAsync(c => c.userID == userId.Value);
-                return userCart;
+                return userCart;              
             }
 
             return null;
@@ -58,6 +57,7 @@ namespace AuthMaster.Services
             return userCart; 
         }
 
+    
 
     }
 }

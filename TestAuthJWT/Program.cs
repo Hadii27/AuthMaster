@@ -47,8 +47,10 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddTransient<ICategoryService, CategoryService>();
 builder.Services.AddTransient<IproductService, ProductService>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<CartServices>();
-
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<DataContext>();
 builder.Services.AddDbContext<DataContext>( Options => 

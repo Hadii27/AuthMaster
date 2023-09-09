@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AuthMaster.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Options;
@@ -52,21 +53,32 @@ namespace TestAuthJWT.Services
 
             await _userManager.AddToRoleAsync(user, "User");
             var jwtSecurityToken = await CreateJwtTokenAsync(user); // Await the token creation method
+            var userID = await _userManager.GetUserIdAsync(user);
+            Guid? userId = null; // Initialize userId to null
+
+            if (Guid.TryParse(userID, out Guid parsedUserId))
+            {
+                userId = parsedUserId;
+            }
 
             return new AuthModel
             {
                 Email = user.Email,
-                ExpireOn = jwtSecurityToken.ValidTo, // Use the correct property name 'ValidTo'
-                isAuthenticated = true, // Correct the property name to 'IsAuthenticated'
+                ExpireOn = jwtSecurityToken.ValidTo,
+                isAuthenticated = true, // Corrected property name
                 Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
-                Roles = new List<string> {"User"}
+                Roles = new List<string> { "User" },
+                userId = parsedUserId
             };
+
+
         }
 
         public async Task <AuthModel> GetTokenAsync(TokenRequestModel model)
         {
             var authModel = new AuthModel();
             var user = await _userManager.FindByNameAsync(model.Username);
+            var userID = await _userManager.GetUserIdAsync(user);
             if (user == null || !await _userManager.CheckPasswordAsync(user,model.Password))
             {
                 authModel.Message = "Email Or Password Not Correct!";
@@ -75,13 +87,17 @@ namespace TestAuthJWT.Services
 
             var jwtSecurityToken = await CreateJwtTokenAsync(user);
             var roleList = await _userManager.GetRolesAsync(user);
-
+            
             authModel.ExpireOn = jwtSecurityToken.ValidTo;
             authModel.isAuthenticated = true;
             authModel.Email = user.Email;
             authModel.Username = user.UserName;
             authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             authModel.Roles = roleList.ToList();
+            if (Guid.TryParse(userID, out Guid userId))
+            {
+                authModel.userId = userId;
+            }
             return authModel;
         }
         public async Task<string> AddRoleAsync(AddRoleModel model)
@@ -101,11 +117,11 @@ namespace TestAuthJWT.Services
             var addRoleResult = await _userManager.AddToRoleAsync(user, model.RoleName);
             if (addRoleResult.Succeeded)
             {
+                var removeUserRoleResult = await _userManager.RemoveFromRoleAsync(user, "User");
                 return string.Empty;
             }
             else
             {
-                // Handle role assignment failure
                 return "Failed to add role to user";
             }
         }
