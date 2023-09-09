@@ -13,6 +13,5 @@ namespace TestAuthJWT.Model
         [Required]
         public string LastName { get; set; }
 
-      
     }
 }

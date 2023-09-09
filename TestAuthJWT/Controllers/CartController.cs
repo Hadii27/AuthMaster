@@ -27,11 +27,17 @@ namespace AuthMaster.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(ItemsDto dto)
         {
+
             var selectedProduct = await _dataContext.products.FindAsync(dto.ProductId);
-            if (selectedProduct == null)
-            {
+            if (selectedProduct == null)            
                 return BadRequest("Selected product does not exist.");
-            }
+
+            if (dto.Quantity == 0)
+                return BadRequest("Quantity must be greater than 0.");
+
+            else if (dto.Quantity > selectedProduct.Quantity)
+                return BadRequest($"Only {selectedProduct.Quantity} available.");
+
 
             var userCart = await _services.GetUserCart();
             if (userCart == null)
@@ -43,15 +49,7 @@ namespace AuthMaster.Controllers
                 };
                 _dataContext.carts.Add(userCart);
                 await _dataContext.SaveChangesAsync();
-            }
-
-            if (dto.Quantity == 0)           
-                 return BadRequest ("Quantity must be greater than 0.");
-            
-            else if (dto.Quantity > selectedProduct.Quantity)           
-                return BadRequest ($"Only {selectedProduct.Quantity} available.");
-            
-
+            }     
             var cartItem = new CartItems
             {
                 ProductId = selectedProduct.ProductId,
@@ -92,10 +90,9 @@ namespace AuthMaster.Controllers
                     return Ok("You don't have any items in your cart!");
                 }                   
             } 
-            else
-            { 
+            else             
                 return Unauthorized();
-            }
+            
             return Ok(userCart);
         }
 
@@ -108,22 +105,15 @@ namespace AuthMaster.Controllers
 
             if (userId.HasValue)
             {
-                if (Usercart is not null)
-                {
-                    return Ok(Usercart.CartItems);
-                }
-                else
-                {
-                    return Ok("You don't have a cart.");
-                }
+                if (Usercart is not null)                
+                    return Ok(Usercart.CartItems);                
+                else                
+                    return Ok("You don't have a cart.");               
             }
             else
-            {
                 return Unauthorized("You don't have permission to access this user cart");
-            }
+            
         }
-
-
     }
 
 }

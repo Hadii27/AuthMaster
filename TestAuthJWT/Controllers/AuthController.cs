@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AuthMaster.Dtos;
+using AuthMaster.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TestAuthJWT.Model;
 using TestAuthJWT.Services;
@@ -12,9 +15,16 @@ namespace TestAuthJWT.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly CartServices _cart;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserService _userService;
+        public AuthController(IAuthService authService, CartServices cart,UserManager<ApplicationUser> userManager, UserService userService)
         {
             _authService = authService;
+            _cart = cart;
+            _userManager = userManager;
+            _userService = userService;
+            
         }
 
         [HttpPost("Register")]
@@ -25,7 +35,7 @@ namespace TestAuthJWT.Controllers
             var result = await _authService.RegisterAsync(model);
             if (!result.isAuthenticated)
                 return BadRequest(result.Message);
-            return Ok(new{Token = result.Token, roles = result.Roles, expireOn = result.ExpireOn });
+            return Ok(result);
         }
 
         [HttpPost("Login")]
@@ -52,5 +62,56 @@ namespace TestAuthJWT.Controllers
                 return BadRequest(result);
             return Ok(model);
         }
+
+        [HttpPut("UpdateUser")]
+        [Authorize]
+        public async Task<IActionResult> UpdateUserAsync([FromBody] UserDto dto)
+        {
+            var currentUser = _cart.GetCurrentUserId();
+            var user = await _userManager.FindByIdAsync(currentUser.ToString());
+            if (currentUser.ToString() != user.Id)
+            {
+                return BadRequest("You can't modify this user");
+            }
+
+            if (string.IsNullOrEmpty(dto.Password) || string.IsNullOrEmpty(dto.UserName))
+            {
+                return BadRequest("Username and password Can't be Empty!.");
+            }
+
+            var UsernameValidator = _userManager.UserValidators.FirstOrDefault();
+            var passwordValidator = _userManager.PasswordValidators.FirstOrDefault();
+
+            if (passwordValidator != null)
+            {
+                var validationResult = await passwordValidator.ValidateAsync(_userManager, user, dto.Password);
+
+                if (!validationResult.Succeeded)
+                    return BadRequest("Invalid password. Password must meet the password policy.");
+
+            }
+
+            if (UsernameValidator != null)
+            {
+                var validationResult = await UsernameValidator.ValidateAsync(_userManager, user);
+
+                if (!validationResult.Succeeded)
+                    return BadRequest("Invalid Username. Username must meet the password policy.");
+            }
+
+            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, dto.Password);
+            user.UserName = dto.UserName;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest();
+            }
+            return Ok(result);
+
+        }
+
     }
 }

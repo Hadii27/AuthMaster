@@ -11,5 +11,7 @@ namespace TestAuthJWT.Model
         public DateTime ExpireOn { get; set; }
         public bool isAuthenticated { get; set; }
         public List<string> Roles { get; set; }
+
+        public Guid userId { get; set; }
     }
 }
