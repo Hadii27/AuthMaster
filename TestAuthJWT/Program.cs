@@ -1,3 +1,4 @@
+using AuthMaster.Model;
 using AuthMaster.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -51,6 +52,7 @@ builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<CartServices>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<BlockList>(); 
 builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<DataContext>();
 builder.Services.AddDbContext<DataContext>( Options => 

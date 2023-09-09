@@ -47,6 +47,13 @@ namespace TestAuthJWT.Controllers
             var result = await _authService.GetTokenAsync(model);
             if (!result.isAuthenticated)
                 return BadRequest(result.Message);
+            Guid userId = result.userId;
+            var blocks = await _userService.GetAllBlackList();
+            var blockedUser = blocks.FirstOrDefault(block => block.userId == userId.ToString());
+            if (blockedUser is not null)
+            {
+                return BadRequest($"You have been blocked and the block id is {blocks}.");
+            }
             return Ok(result);
         }
 
