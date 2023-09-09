@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging; // Add this namespace for logging
+using System;
 using System.Security.Claims;
 using TestAuthJWT.Data;
+using TestAuthJWT.Migrations;
 using TestAuthJWT.Model;
 
 namespace AuthMaster.Services
@@ -15,12 +17,14 @@ namespace AuthMaster.Services
         private readonly DataContext _dataContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly BlockList _blockList;
 
-        public UserService(DataContext dataContext, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
+        public UserService(DataContext dataContext, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor, BlockList blockList)
         {
             _dataContext = dataContext;
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
+            _blockList = blockList;
         }
 
         //public async Task<ApplicationUser> GetCurrentUserInfoAsync()
@@ -66,11 +70,10 @@ namespace AuthMaster.Services
         //    return user;
 
         //}
-
         public async Task<List<GetUsersDto>> GetAllUsers()
         {
             var user = await _dataContext.Users
-                .OrderBy(u=> u.UserName)
+                .OrderBy(u => u.UserName)
                 .Select(u => new GetUsersDto
                 {
                     Email = u.Email,
@@ -88,9 +91,9 @@ namespace AuthMaster.Services
         public async Task<IEnumerable<Order>> GetOrders(Guid id)
         {
             var orders = await _dataContext.orders
-                .OrderBy(u=>u.DateTime)
+                .OrderBy(u => u.DateTime)
                 .Where(Order => Order.UserId == id)
-                .ToListAsync();            
+                .ToListAsync();
             return orders;
 
         }
@@ -106,5 +109,47 @@ namespace AuthMaster.Services
             return user;
         }
 
+        public async Task<ApplicationUser> GetByID(string id)
+        {
+            string IdString = id.ToString();
+            var user = await _dataContext.Users
+                .Where(u => u.Id == IdString)
+                .SingleOrDefaultAsync();
+            return user;
+        }
+
+
+        public async Task<IEnumerable<BlockList>> GetAllBlackList()
+        {
+            var blackListEntries = await _dataContext.blockLists.ToListAsync();
+
+            return blackListEntries;
+        }
+        public async Task<BlockList> Block(string ID)
+        {
+            string IdString = ID.ToString();
+            var user = await _dataContext.Users
+                .Where(u => u.Id == IdString)
+                .SingleOrDefaultAsync();
+            
+                var BlockUser = new BlockList
+                {
+                    userId = ID,
+                    Blocked = "True",
+                    dateTime = DateTime.Now,
+                    Reason = "Abuse",
+                };
+
+                _dataContext.blockLists.Add(BlockUser);
+                await _dataContext.SaveChangesAsync();
+                return BlockUser;            
+        }
+
+     
+
     }
+
+
+
+
 }

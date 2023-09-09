@@ -21,5 +21,6 @@ namespace TestAuthJWT.Data
 
         public DbSet<OrderItems> ordersItems { get; set; }
 
+        public DbSet<BlockList> blockLists { get; set; }
     }
 }
